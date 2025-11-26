@@ -1,12 +1,15 @@
+
 import React from 'react';
+import { toast } from 'react-hot-toast';
 import { CheckIcon } from './Icons';
 import { Button } from './Button';
 
 interface PricingViewProps {
   onBack: () => void;
+  userId: string | null;
 }
 
-export const PricingView: React.FC<PricingViewProps> = ({ onBack }) => {
+export const PricingView: React.FC<PricingViewProps> = ({ onBack, userId }) => {
   const plans = [
     {
       name: 'Pro Monthly',
@@ -16,8 +19,8 @@ export const PricingView: React.FC<PricingViewProps> = ({ onBack }) => {
       features: ['Unlimited generations', 'High-res downloads', 'Commercial usage rights', 'Access to all styles'],
       highlight: false,
       btnText: 'Subscribe Monthly',
-      // REPLACE with your actual Dodo Payments Monthly Product Link
-      paymentLink: 'https://checkout.dodopayments.com/buy/YOUR_MONTHLY_PRODUCT_ID' 
+      // Real Dodo Product ID: pdt_3aVAmpWj3afidH9fHcaTE
+      paymentLink: 'https://checkout.dodopayments.com/buy/pdt_3aVAmpWj3afidH9fHcaTE' 
     },
     {
       name: 'Pro Annual',
@@ -28,8 +31,8 @@ export const PricingView: React.FC<PricingViewProps> = ({ onBack }) => {
       highlight: false,
       badge: 'Best Value',
       btnText: 'Subscribe Annually',
-      // REPLACE with your actual Dodo Payments Annual Product Link
-      paymentLink: 'https://checkout.dodopayments.com/buy/YOUR_ANNUAL_PRODUCT_ID'
+      // Real Dodo Product ID: pdt_s9jBBy4nhitAcBtt25zqX
+      paymentLink: 'https://checkout.dodopayments.com/buy/pdt_s9jBBy4nhitAcBtt25zqX'
     },
     {
       name: 'Lifetime',
@@ -40,18 +43,38 @@ export const PricingView: React.FC<PricingViewProps> = ({ onBack }) => {
       highlight: true,
       badge: 'Limited Time',
       btnText: 'Get Lifetime Access',
-      // REPLACE with your actual Dodo Payments Lifetime Product Link
-      paymentLink: 'https://checkout.dodopayments.com/buy/YOUR_LIFETIME_PRODUCT_ID'
+      // Real Dodo Product ID: pdt_A2VyEzVG0z8LgBSTtu8mA
+      paymentLink: 'https://checkout.dodopayments.com/buy/pdt_A2VyEzVG0z8LgBSTtu8mA'
     }
   ];
 
   const handleSubscribe = (link: string) => {
-    // Open the payment link in a new tab
-    if (link.includes('YOUR_')) {
-        alert("Please configure your Dodo Payment links in components/PricingView.tsx");
+    // 1. Validation
+    if (!userId) {
+        toast.error("Please sign in to subscribe.");
         return;
     }
-    window.open(link, '_blank');
+
+    try {
+        // 2. Construct the Dodo Payments URL safely
+        const url = new URL(link);
+        
+        // Ensure quantity is set
+        url.searchParams.set('quantity', '1');
+        
+        // Attach Return URL (Where to send user after payment)
+        url.searchParams.set('redirect_url', window.location.origin);
+        
+        // Attach Metadata (The "Sticky Note" with User ID for the backend)
+        url.searchParams.set('metadata_user_id', userId);
+        
+        // 3. Redirect user
+        window.location.href = url.toString();
+        
+    } catch (e) {
+        console.error("Invalid Payment Link:", e);
+        toast.error("Could not initiate payment. Please contact support.");
+    }
   };
 
   return (
