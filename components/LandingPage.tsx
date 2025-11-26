@@ -247,8 +247,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOp
                                 </div>
                                 <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 shadow-2xl">
                                     <img 
-                                        src="https://plus.unsplash.com/premium_photo-1688572454849-4348982bf7d5?q=80&w=800&auto=format&fit=crop" 
-                                        alt="Professional Woman Corporate" 
+                                        src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800" 
+                                        alt="Nigerian Professional Woman Banker Headshot" 
                                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" 
                                     />
                                 </div>
@@ -256,8 +256,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOp
                             <div className="space-y-4">
                                 <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 shadow-2xl">
                                     <img 
-                                        src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=800" 
-                                        alt="Creative Professional Woman" 
+                                        src="https://images.unsplash.com/photo-1589156280159-27698a70f29e?auto=format&fit=crop&q=80&w=800" 
+                                        alt="Nigerian Professional Lady Headshot" 
                                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" 
                                     />
                                 </div>
