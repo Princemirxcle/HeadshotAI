@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+@import "tailwindcss";
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #222222;
+}
+::-webkit-scrollbar-thumb {
+  background: #444444;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+/* Your custom styles */
+body {
+  background-color: #222222;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+
+.text-glow {
+  text-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
+}
+
+.glass-card {
+  background: rgba(30, 30, 30, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
