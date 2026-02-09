@@ -74,16 +74,16 @@ const App = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (uid: string) => {
     try {
-        const { data } = await supabase
+        const { data, error } = await supabase
             .from('profiles')
             .select('full_name')
-            .eq('id', userId)
+            .eq('id', uid)
             .single();
-        if (data) setUserProfile(data);
+        if (!error && data) setUserProfile(data);
     } catch (e) {
-        console.error("Error fetching profile:", e);
+        // Profile table may not exist yet - non-critical
     }
   };
 

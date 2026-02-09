@@ -13,11 +13,12 @@ export const editImageWithGemini = async (
   mimeType: string,
   prompt: string
 ): Promise<string> => {
-  if (!process.env.API_KEY) {
-    throw new Error("API Key is missing. Please check your environment configuration.");
+  const apiKey = import.meta.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("Gemini API Key is not configured. Add GEMINI_API_KEY to your .env file.");
   }
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey });
 
   // 1. Construct the request parts: Image + Text Prompt
   // Gemini 2.5 Flash Image supports "editing" by simply providing the source image and a prompt describing the desired output.
@@ -38,6 +39,9 @@ export const editImageWithGemini = async (
       model: 'gemini-2.5-flash-image',
       contents: {
         parts: parts,
+      },
+      config: {
+        responseModalities: ['Text', 'Image'],
       },
     });
 
