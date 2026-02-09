@@ -56,14 +56,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOp
                 }
             });
             error = signUpError;
-            
+
             if (!error) {
-                // If Email Confirmation is disabled in Supabase, data.session will be present immediately
+                // If Email Confirmation is disabled in Supabase, data.session will be present immediately.
+                // The onAuthStateChange listener in App.tsx handles navigation automatically.
                 if (data.session) {
                     toast.success("Welcome to ProHeadshot AI!");
-                    onLogin(); 
                 } else {
-                    // Fallback if confirmation is still enabled on backend
                     toast.success("Account created! Please check your email to verify.");
                 }
             }
@@ -75,7 +74,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOp
             error = signInError;
             if (!error && data.session) {
                 toast.success("Welcome back!");
-                onLogin();
+                // The onAuthStateChange listener in App.tsx handles navigation automatically.
             }
         }
 
