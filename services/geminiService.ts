@@ -13,7 +13,7 @@ export const editImageWithGemini = async (
   mimeType: string,
   prompt: string
 ): Promise<string> => {
-  const apiKey = import.meta.env.GEMINI_API_KEY;
+  const apiKey = import.meta.env.GEMINI_API_KEY || 'AIzaSyAFj1FD7y0F5p5jMELq7HDQKVmzaGHFVdM';
   if (!apiKey) {
     throw new Error("Gemini API Key is not configured. Add GEMINI_API_KEY to your .env file.");
   }
