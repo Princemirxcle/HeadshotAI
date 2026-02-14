@@ -222,8 +222,11 @@ const App = () => {
       
       {/* Simple Footer */}
       <footer className="border-t border-white/5 py-8 bg-brand-900">
-        <div className="max-w-7xl mx-auto px-4 text-center text-zinc-600 text-sm">
-            &copy; {new Date().getFullYear()} ProHeadshot AI. All rights reserved.
+        <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-4">
+            <a href="https://www.producthunt.com/products/proheadshot-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-proheadshot-ai" target="_blank" rel="noopener noreferrer">
+                <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1079365&theme=dark&t=1771077041545" alt="ProHeadshot AI - Turn any selfie into a studio-quality headshot in seconds. | Product Hunt" width="250" height="54" />
+            </a>
+            <p className="text-zinc-600 text-sm">&copy; {new Date().getFullYear()} ProHeadshot AI. All rights reserved.</p>
         </div>
       </footer>
     </div>

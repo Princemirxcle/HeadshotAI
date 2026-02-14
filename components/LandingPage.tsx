@@ -228,6 +228,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOp
                             </div>
                             <p>Trusted by 10,000+ professionals</p>
                         </div>
+
+                        <div className="mt-2">
+                            <a href="https://www.producthunt.com/products/proheadshot-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-proheadshot-ai" target="_blank" rel="noopener noreferrer">
+                                <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1079365&theme=dark&t=1771077041545" alt="ProHeadshot AI - Turn any selfie into a studio-quality headshot in seconds. | Product Hunt" width="250" height="54" />
+                            </a>
+                        </div>
                     </div>
 
                     <div className="relative">
