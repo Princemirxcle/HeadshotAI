@@ -16,7 +16,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onBack, userId }) => {
       price: '$10',
       period: '/month',
       description: 'Flexible billing for short-term projects.',
-      features: ['Unlimited generations', 'High-res downloads', 'Commercial usage rights', 'Access to all styles'],
+      features: ['Unlimited generations', '4K resolution, no watermark', 'Commercial usage rights', 'Access to all styles'],
       highlight: false,
       btnText: 'Subscribe Monthly',
       // Real Dodo Product ID: pdt_3aVAmpWj3afidH9fHcaTE
@@ -89,13 +89,37 @@ export const PricingView: React.FC<PricingViewProps> = ({ onBack, userId }) => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Free Tier Card */}
+        <div className="relative rounded-2xl p-8 flex flex-col transition-all duration-300 bg-zinc-900/30 border border-zinc-800 opacity-80">
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-white">Free</h3>
+            <p className="mt-2 text-zinc-400 text-sm h-10">Try it out with a single preview.</p>
+          </div>
+          <div className="mb-8 flex items-baseline">
+            <span className="text-4xl font-bold text-white">$0</span>
+            <span className="text-zinc-500 ml-2 font-medium">forever</span>
+          </div>
+          <div className="border-t border-zinc-800 my-6"></div>
+          <ul className="space-y-4 mb-8 flex-1">
+            {['1 generation', '512px resolution', 'Watermarked preview', 'All styles'].map((feature) => (
+              <li key={feature} className="flex items-start">
+                <CheckIcon className="w-5 h-5 mr-3 shrink-0 text-zinc-600" />
+                <span className="text-zinc-400 text-sm">{feature}</span>
+              </li>
+            ))}
+          </ul>
+          <Button variant="outline" className="w-full" disabled>
+            Current Plan
+          </Button>
+        </div>
+
         {plans.map((plan) => (
-          <div 
+          <div
             key={plan.name}
             className={`relative rounded-2xl p-8 flex flex-col transition-all duration-300 ${
-                plan.highlight 
-                ? 'bg-gradient-to-b from-zinc-800 to-zinc-900 border-2 border-blue-500/50 shadow-2xl shadow-blue-900/20 transform md:-translate-y-2' 
+                plan.highlight
+                ? 'bg-gradient-to-b from-zinc-800 to-zinc-900 border-2 border-blue-500/50 shadow-2xl shadow-blue-900/20 transform md:-translate-y-2'
                 : 'bg-zinc-900/30 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/50'
             }`}
           >

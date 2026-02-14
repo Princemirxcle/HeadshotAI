@@ -2,13 +2,18 @@ import React from 'react';
 import { DownloadIcon } from './Icons';
 import { Button } from './Button';
 
+import { UserPlan } from '../types';
+
 interface ComparisonViewProps {
   originalUrl: string;
   generatedUrl: string | null;
   isLoading: boolean;
+  userPlan?: UserPlan;
+  onUpgrade?: () => void;
 }
 
-export const ComparisonView: React.FC<ComparisonViewProps> = ({ originalUrl, generatedUrl, isLoading }) => {
+export const ComparisonView: React.FC<ComparisonViewProps> = ({ originalUrl, generatedUrl, isLoading, userPlan = 'free', onUpgrade }) => {
+  const isFree = userPlan === 'free';
   
   const handleDownload = () => {
     if (generatedUrl) {
@@ -66,11 +71,28 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({ originalUrl, gen
 
       {generatedUrl && !isLoading && (
           <div className="p-4 border-t border-zinc-800/50 bg-zinc-900/40 flex justify-end items-center gap-4 backdrop-blur-sm absolute bottom-0 w-full">
-             <span className="text-xs text-zinc-500 hidden sm:inline-block">Generated with Gemini 2.5 Flash</span>
-             <Button variant="primary" onClick={handleDownload} className="shadow-lg shadow-white/10">
-                <DownloadIcon className="w-4 h-4 mr-2" />
-                Download HD
-             </Button>
+             {isFree ? (
+               <>
+                 <span className="text-xs text-amber-400/80 hidden sm:inline-block">512px watermarked preview</span>
+                 <Button variant="outline" onClick={handleDownload} className="shadow-lg shadow-white/10">
+                    <DownloadIcon className="w-4 h-4 mr-2" />
+                    Download Preview
+                 </Button>
+                 {onUpgrade && (
+                   <Button variant="primary" onClick={onUpgrade} className="shadow-lg shadow-blue-500/20 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 border-0 text-white">
+                      Get 4K HD
+                   </Button>
+                 )}
+               </>
+             ) : (
+               <>
+                 <span className="text-xs text-zinc-500 hidden sm:inline-block">Generated with Gemini 2.5 Flash</span>
+                 <Button variant="primary" onClick={handleDownload} className="shadow-lg shadow-white/10">
+                    <DownloadIcon className="w-4 h-4 mr-2" />
+                    Download 4K HD
+                 </Button>
+               </>
+             )}
           </div>
       )}
     </div>

@@ -5,10 +5,16 @@ import { Button } from './Button';
 import { PresetSelector } from './PresetSelector';
 import { ComparisonView } from './ComparisonView';
 import { editImageWithGemini, fileToBase64 } from '../services/geminiService';
-import { ImageState, GenerationStatus, PresetPrompt } from '../types';
+import { processForFreeTier } from '../services/imageProcessing';
+import { ImageState, GenerationStatus, PresetPrompt, UserPlan, FREE_TIER } from '../types';
 import { PRESET_PROMPTS } from '../constants';
 
-export const EditorView = () => {
+interface EditorViewProps {
+  userPlan: UserPlan;
+  onUpgrade: () => void;
+}
+
+export const EditorView: React.FC<EditorViewProps> = ({ userPlan, onUpgrade }) => {
   const [imageState, setImageState] = useState<ImageState>({
     file: null,
     previewUrl: null,
@@ -21,7 +27,11 @@ export const EditorView = () => {
   const [selectedPresetId, setSelectedPresetId] = useState<string>(PRESET_PROMPTS[0].id);
   const [customPrompt, setCustomPrompt] = useState<string>(PRESET_PROMPTS[0].prompt);
   const [isCustomMode, setIsCustomMode] = useState(false);
-  
+  const [freeGenerationsUsed, setFreeGenerationsUsed] = useState(0);
+
+  const isFree = userPlan === 'free';
+  const hasReachedFreeLimit = isFree && freeGenerationsUsed >= FREE_TIER.maxGenerations;
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const promptTextareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -74,15 +84,26 @@ export const EditorView = () => {
         toast.error("Please describe the edit you want to make.");
         return;
     }
+    if (hasReachedFreeLimit) {
+        toast.error("You've used your free preview. Upgrade to Pro for unlimited generations.");
+        return;
+    }
 
     setStatus(GenerationStatus.LOADING);
-    
+
     try {
-      const resultUrl = await editImageWithGemini(
+      let resultUrl = await editImageWithGemini(
         imageState.base64Data,
         imageState.mimeType,
         customPrompt
       );
+
+      // Free tier: downscale to 512px and apply watermark
+      if (isFree) {
+        resultUrl = await processForFreeTier(resultUrl, FREE_TIER.maxResolution);
+        setFreeGenerationsUsed((prev) => prev + 1);
+      }
+
       setGeneratedImage(resultUrl);
       setStatus(GenerationStatus.SUCCESS);
     } catch (error: any) {
@@ -212,22 +233,56 @@ export const EditorView = () => {
                         </div>
                     </div>
 
-                    <Button 
-                        onClick={handleGenerate}
-                        isLoading={status === GenerationStatus.LOADING}
-                        className="w-full py-3.5 text-sm font-semibold shadow-lg shadow-brand-900/20 active:translate-y-0.5 bg-brand-600 hover:bg-brand-500 text-white border-0"
-                    >
-                        {status === GenerationStatus.LOADING ? (
-                            <span className="flex items-center">Processing...</span>
-                        ) : (
+                    {hasReachedFreeLimit ? (
+                        <Button
+                            onClick={onUpgrade}
+                            className="w-full py-3.5 text-sm font-semibold shadow-lg shadow-blue-900/20 active:translate-y-0.5 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white border-0"
+                        >
                             <span className="flex items-center">
-                                <SparklesIcon className="w-4 h-4 mr-2" />
-                                Generate Image
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                </svg>
+                                Upgrade to Pro
                             </span>
-                        )}
-                    </Button>
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={handleGenerate}
+                            isLoading={status === GenerationStatus.LOADING}
+                            className="w-full py-3.5 text-sm font-semibold shadow-lg shadow-brand-900/20 active:translate-y-0.5 bg-brand-600 hover:bg-brand-500 text-white border-0"
+                        >
+                            {status === GenerationStatus.LOADING ? (
+                                <span className="flex items-center">Processing...</span>
+                            ) : (
+                                <span className="flex items-center">
+                                    <SparklesIcon className="w-4 h-4 mr-2" />
+                                    {isFree ? 'Generate Free Preview' : 'Generate Image'}
+                                </span>
+                            )}
+                        </Button>
+                    )}
                 </div>
-                
+
+                {isFree && (
+                    <div className="bg-blue-950/30 border border-blue-800/30 rounded-xl p-4 text-center">
+                        {hasReachedFreeLimit ? (
+                            <>
+                                <p className="text-sm text-blue-300 font-medium mb-1">Free preview used</p>
+                                <p className="text-xs text-zinc-400">Upgrade to Pro for unlimited 4K generations without watermarks.</p>
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-xs text-zinc-400">
+                                    <span className="text-blue-400 font-medium">Free plan:</span> 1 watermarked preview at 512px.{' '}
+                                    <button onClick={onUpgrade} className="text-blue-400 hover:text-blue-300 underline underline-offset-2">
+                                        Upgrade for 4K
+                                    </button>
+                                </p>
+                            </>
+                        )}
+                    </div>
+                )}
+
                 <div className="px-2 text-center">
                     <p className="text-xs text-zinc-600">
                         Using <span className="text-zinc-500 font-medium">Gemini 2.5 Flash Image</span> for high-fidelity editing.
@@ -237,10 +292,12 @@ export const EditorView = () => {
 
                 {/* Right Panel - Preview */}
                 <div className="lg:col-span-8 order-1 lg:order-2">
-                <ComparisonView 
+                <ComparisonView
                     originalUrl={imageState.previewUrl}
                     generatedUrl={generatedImage}
                     isLoading={status === GenerationStatus.LOADING}
+                    userPlan={userPlan}
+                    onUpgrade={onUpgrade}
                 />
                 </div>
 

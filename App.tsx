@@ -6,6 +6,7 @@ import { PricingView } from './components/PricingView';
 import { LandingPage } from './components/LandingPage';
 import { Button } from './components/Button';
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient';
+import { UserPlan } from './types';
 
 type ViewState = 'landing' | 'editor' | 'pricing';
 
@@ -15,6 +16,7 @@ const App = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [userProfile, setUserProfile] = useState<{ full_name: string | null } | null>(null);
+  const [userPlan, setUserPlan] = useState<UserPlan>('free');
 
   // Initialize Auth Session
   useEffect(() => {
@@ -78,10 +80,13 @@ const App = () => {
     try {
         const { data, error } = await supabase
             .from('profiles')
-            .select('full_name')
+            .select('full_name, plan')
             .eq('id', uid)
             .single();
-        if (!error && data) setUserProfile(data);
+        if (!error && data) {
+            setUserProfile(data);
+            setUserPlan((data as any).plan === 'pro' ? 'pro' : 'free');
+        }
     } catch (e) {
         // Profile table may not exist yet - non-critical
     }
@@ -206,7 +211,7 @@ const App = () => {
         
         {currentView === 'editor' && (
              <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 flex-1 flex flex-col">
-                <EditorView />
+                <EditorView userPlan={userPlan} onUpgrade={() => navigateTo('pricing')} />
              </div>
         )}
 

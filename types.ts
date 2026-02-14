@@ -25,3 +25,17 @@ export interface PresetPrompt {
   prompt: string;
   icon?: string;
 }
+
+export type UserPlan = 'free' | 'pro';
+
+export const FREE_TIER = {
+  maxGenerations: 1,
+  maxResolution: 512,
+  watermark: true,
+} as const;
+
+export const PRO_TIER = {
+  maxGenerations: Infinity,
+  maxResolution: 4096,
+  watermark: false,
+} as const;
