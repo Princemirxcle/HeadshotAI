@@ -89,31 +89,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onBack, userId }) => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Free Tier Card */}
-        <div className="relative rounded-2xl p-8 flex flex-col transition-all duration-300 bg-zinc-900/30 border border-zinc-800 opacity-80">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-white">Free</h3>
-            <p className="mt-2 text-zinc-400 text-sm h-10">Try it out with a single preview.</p>
-          </div>
-          <div className="mb-8 flex items-baseline">
-            <span className="text-4xl font-bold text-white">$0</span>
-            <span className="text-zinc-500 ml-2 font-medium">forever</span>
-          </div>
-          <div className="border-t border-zinc-800 my-6"></div>
-          <ul className="space-y-4 mb-8 flex-1">
-            {['1 generation', '512px resolution', 'Watermarked preview', 'All styles'].map((feature) => (
-              <li key={feature} className="flex items-start">
-                <CheckIcon className="w-5 h-5 mr-3 shrink-0 text-zinc-600" />
-                <span className="text-zinc-400 text-sm">{feature}</span>
-              </li>
-            ))}
-          </ul>
-          <Button variant="outline" className="w-full" disabled>
-            Current Plan
-          </Button>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {plans.map((plan) => (
           <div
             key={plan.name}
