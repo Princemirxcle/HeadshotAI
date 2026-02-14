@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Homepage / Landing Page -->
+  <url>
+    <loc>https://proheadshot.ai/</loc>
+    <lastmod>2026-02-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://proheadshot.ai/og-image.png</image:loc>
+      <image:title>ProHeadshot AI - AI Headshot Maker</image:title>
+      <image:caption>Turn selfies into professional AI headshots in seconds</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Pricing Page -->
+  <url>
+    <loc>https://proheadshot.ai/#pricing</loc>
+    <lastmod>2026-02-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Editor / App Page -->
+  <url>
+    <loc>https://proheadshot.ai/#editor</loc>
+    <lastmod>2026-02-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+</urlset>

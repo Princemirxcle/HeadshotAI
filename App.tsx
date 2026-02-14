@@ -105,6 +105,16 @@ const App = () => {
     setCurrentView('landing');
   };
 
+  // Dynamic page titles for SEO and browser tab clarity
+  useEffect(() => {
+    const titles: Record<ViewState, string> = {
+      landing: 'AI Headshot Maker - Professional Headshots from Selfies | ProHeadshot AI',
+      editor: 'AI Headshot Editor - Create Professional Headshots | ProHeadshot AI',
+      pricing: 'Pricing - AI Headshot Maker Plans | ProHeadshot AI',
+    };
+    document.title = titles[currentView];
+  }, [currentView]);
+
   const navigateTo = (view: ViewState) => {
     // Redirect to landing if trying to access editor while not authenticated
     if (view === 'editor' && !isAuthenticated) {
@@ -137,54 +147,58 @@ const App = () => {
       />
 
       {/* Header */}
-      <header className="w-full z-50 border-b border-white/5 bg-brand-900/80 backdrop-blur-md sticky top-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <button 
-            onClick={() => navigateTo(isAuthenticated ? 'editor' : 'landing')} 
+      <header className="w-full z-50 border-b border-white/5 bg-brand-900/80 backdrop-blur-md sticky top-0" role="banner">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between" aria-label="Main navigation">
+          <a
+            href="/"
+            onClick={(e) => { e.preventDefault(); navigateTo(isAuthenticated ? 'editor' : 'landing'); }}
             className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none group"
+            aria-label="ProHeadshot AI - AI Headshot Maker Home"
           >
              <span className="text-lg font-bold tracking-tight text-white group-hover:text-glow transition-all">ProHeadshot<span className="text-white font-normal">AI</span></span>
-          </button>
-          
+          </a>
+
           <div className="flex items-center gap-6 text-sm font-medium text-zinc-400">
-            <button 
-                onClick={() => navigateTo('pricing')} 
+            <button
+                onClick={() => navigateTo('pricing')}
                 className={`transition-colors hidden sm:block ${currentView === 'pricing' ? 'text-white' : 'text-zinc-400 hover:text-white'}`}
+                aria-current={currentView === 'pricing' ? 'page' : undefined}
             >
                 Pricing
             </button>
             
             {isAuthenticated ? (
                  <div className="flex items-center gap-4">
-                     <button 
+                     <button
                         onClick={() => navigateTo('editor')}
                         className={`${currentView === 'editor' ? 'text-white' : 'text-zinc-400 hover:text-white'} transition-colors hidden sm:block`}
+                        aria-current={currentView === 'editor' ? 'page' : undefined}
                      >
                         Editor
                      </button>
-                     
+
                      <div className="flex items-center gap-3 pl-3 border-l border-zinc-700">
                          {userProfile?.full_name && (
                              <span className="text-xs text-zinc-300 hidden md:block">
                                  Hi, {userProfile.full_name.split(' ')[0]}
                              </span>
                          )}
-                         <Button variant="outline" onClick={handleLogout} className="h-8 px-3 text-xs">
+                         <Button variant="outline" onClick={handleLogout} className="h-8 px-3 text-xs" aria-label="Sign out of your account">
                             Sign Out
                          </Button>
                      </div>
                  </div>
             ) : (
                 <div className="flex items-center gap-4">
-                    <button 
-                        onClick={handleAuthTrigger} 
+                    <button
+                        onClick={handleAuthTrigger}
                         className="text-zinc-400 hover:text-white transition-colors"
                     >
                         Sign in
                     </button>
-                    <Button 
-                        variant="primary" 
-                        onClick={handleAuthTrigger} 
+                    <Button
+                        variant="primary"
+                        onClick={handleAuthTrigger}
                         className="h-9 px-4 text-xs bg-white text-black hover:bg-zinc-200"
                     >
                         Get Started
@@ -192,7 +206,7 @@ const App = () => {
                 </div>
             )}
           </div>
-        </div>
+        </nav>
       </header>
 
       <main className="flex-1 w-full flex flex-col">
@@ -220,13 +234,19 @@ const App = () => {
         )}
       </main>
       
-      {/* Simple Footer */}
-      <footer className="border-t border-white/5 py-8 bg-brand-900">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-4">
-            <a href="https://www.producthunt.com/products/proheadshot-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-proheadshot-ai" target="_blank" rel="noopener noreferrer">
-                <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1079365&theme=dark&t=1771077041545" alt="ProHeadshot AI - Turn any selfie into a studio-quality headshot in seconds. | Product Hunt" width="250" height="54" />
+      {/* Footer */}
+      <footer className="border-t border-white/5 py-8 bg-brand-900" role="contentinfo">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-6 text-sm text-zinc-500">
+                <a href="/" onClick={(e) => { e.preventDefault(); navigateTo('landing'); }} className="hover:text-white transition-colors">AI Headshot Maker</a>
+                <a href="#pricing" onClick={(e) => { e.preventDefault(); navigateTo('pricing'); }} className="hover:text-white transition-colors">Pricing</a>
+                <a href="#faq" onClick={(e) => { e.preventDefault(); navigateTo('landing'); }} className="hover:text-white transition-colors">FAQ</a>
+                <a href="mailto:support@proheadshot.ai" className="hover:text-white transition-colors">Contact</a>
+            </div>
+            <a href="https://www.producthunt.com/products/proheadshot-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-proheadshot-ai" target="_blank" rel="noopener noreferrer" aria-label="ProHeadshot AI on Product Hunt">
+                <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1079365&theme=dark&t=1771077041545" alt="ProHeadshot AI featured on Product Hunt - AI headshot maker" width="250" height="54" loading="lazy" />
             </a>
-            <p className="text-zinc-600 text-sm">&copy; {new Date().getFullYear()} ProHeadshot AI. All rights reserved.</p>
+            <p className="text-zinc-600 text-sm">&copy; {new Date().getFullYear()} ProHeadshot AI. The best AI headshot maker for professionals.</p>
         </div>
       </footer>
     </div>

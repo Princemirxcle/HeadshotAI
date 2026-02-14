@@ -1,0 +1,23 @@
+# robots.txt for ProHeadshot AI
+# https://proheadshot.ai
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /auth/
+
+# Sitemaps
+Sitemap: https://proheadshot.ai/sitemap.xml
+
+# Crawl-delay (optional, for polite crawling)
+Crawl-delay: 1
+
+# Google-specific
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+
+# Bing-specific
+User-agent: Bingbot
+Allow: /
+Disallow: /api/

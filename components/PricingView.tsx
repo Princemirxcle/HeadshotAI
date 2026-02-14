@@ -78,14 +78,14 @@ export const PricingView: React.FC<PricingViewProps> = ({ onBack, userId }) => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <section className="w-full max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8 animate-in fade-in slide-in-from-bottom-4 duration-500" aria-label="ProHeadshot AI pricing plans">
       <div className="text-center max-w-3xl mx-auto mb-12">
-        <button onClick={onBack} className="mb-8 text-zinc-400 hover:text-white flex items-center justify-center gap-2 mx-auto transition-colors text-sm font-medium bg-zinc-900/50 px-4 py-2 rounded-full border border-zinc-800">
+        <button onClick={onBack} className="mb-8 text-zinc-400 hover:text-white flex items-center justify-center gap-2 mx-auto transition-colors text-sm font-medium bg-zinc-900/50 px-4 py-2 rounded-full border border-zinc-800" aria-label="Go back to editor">
             ← Back to Editor
         </button>
-        <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Simple, transparent pricing</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">AI Headshot Maker Pricing</h2>
         <p className="mt-4 text-lg text-zinc-400">
-          Upgrade to ProHeadshot AI for professional results. Choose the plan that fits your needs.
+          Upgrade to ProHeadshot AI for unlimited professional AI headshots. Simple, transparent pricing — choose the plan that fits your needs.
         </p>
       </div>
 
@@ -138,9 +138,9 @@ export const PricingView: React.FC<PricingViewProps> = ({ onBack, userId }) => {
       </div>
       
       <div className="mt-12 text-center text-xs text-zinc-600">
-         Secure payment processing via Dodo Payments. <br/> 
-         Questions? Contact support@proheadshot.ai
+         Secure payment processing via Dodo Payments. <br/>
+         Questions? Contact <a href="mailto:support@proheadshot.ai" className="hover:text-zinc-400 transition-colors underline">support@proheadshot.ai</a>
       </div>
-    </div>
+    </section>
   );
 };
