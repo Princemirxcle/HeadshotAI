@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { CheckIcon } from './Icons';
 import { Button } from './Button';
@@ -9,44 +9,113 @@ interface PricingViewProps {
   userId: string | null;
 }
 
+interface PlanData {
+  name: string;
+  price: string;
+  period: string;
+  description: string;
+  features: string[];
+  highlight: boolean;
+  badge?: string;
+  btnText: string;
+  paymentLink: string;
+}
+
+const DEFAULT_PLANS: PlanData[] = [
+  {
+    name: 'Pro Monthly',
+    price: '$10',
+    period: '/month',
+    description: 'Flexible billing for short-term projects.',
+    features: ['Unlimited generations', 'High-res downloads', 'Commercial usage rights', 'Access to all styles'],
+    highlight: false,
+    btnText: 'Subscribe Monthly',
+    paymentLink: 'https://checkout.dodopayments.com/buy/pdt_3aVAmpWj3afidH9fHcaTE'
+  },
+  {
+    name: 'Pro Annual',
+    price: '$99',
+    period: '/year',
+    description: 'Save 17% with yearly billing.',
+    features: ['Everything in Monthly', 'Priority generation speed', 'Early access to new models', 'Premium support'],
+    highlight: false,
+    badge: 'Best Value',
+    btnText: 'Subscribe Annually',
+    paymentLink: 'https://checkout.dodopayments.com/buy/pdt_s9jBBy4nhitAcBtt25zqX'
+  },
+  {
+    name: 'Lifetime',
+    price: '$150',
+    period: 'one-time',
+    description: 'Pay once, own Pro forever.',
+    features: ['Everything in Annual', 'Lifetime updates', 'No recurring fees', 'Founder community access'],
+    highlight: true,
+    badge: 'Limited Time',
+    btnText: 'Get Lifetime Access',
+    paymentLink: 'https://checkout.dodopayments.com/buy/pdt_A2VyEzVG0z8LgBSTtu8mA'
+  }
+];
+
+// Nigeria PPP-adjusted pricing (~75% discount, similar to ChatGPT's regional pricing)
+const NIGERIA_PLANS: PlanData[] = [
+  {
+    name: 'Pro Monthly',
+    price: '₦3,500',
+    period: '/month',
+    description: 'Flexible billing for short-term projects.',
+    features: ['Unlimited generations', 'High-res downloads', 'Commercial usage rights', 'Access to all styles'],
+    highlight: false,
+    btnText: 'Subscribe Monthly',
+    paymentLink: 'https://checkout.dodopayments.com/buy/pdt_3aVAmpWj3afidH9fHcaTE'
+  },
+  {
+    name: 'Pro Annual',
+    price: '₦25,000',
+    period: '/year',
+    description: 'Save 40% with yearly billing.',
+    features: ['Everything in Monthly', 'Priority generation speed', 'Early access to new models', 'Premium support'],
+    highlight: false,
+    badge: 'Best Value',
+    btnText: 'Subscribe Annually',
+    paymentLink: 'https://checkout.dodopayments.com/buy/pdt_s9jBBy4nhitAcBtt25zqX'
+  },
+  {
+    name: 'Lifetime',
+    price: '₦37,500',
+    period: 'one-time',
+    description: 'Pay once, own Pro forever.',
+    features: ['Everything in Annual', 'Lifetime updates', 'No recurring fees', 'Founder community access'],
+    highlight: true,
+    badge: 'Limited Time',
+    btnText: 'Get Lifetime Access',
+    paymentLink: 'https://checkout.dodopayments.com/buy/pdt_A2VyEzVG0z8LgBSTtu8mA'
+  }
+];
+
 export const PricingView: React.FC<PricingViewProps> = ({ onBack, userId }) => {
-  const plans = [
-    {
-      name: 'Pro Monthly',
-      price: '$10',
-      period: '/month',
-      description: 'Flexible billing for short-term projects.',
-      features: ['Unlimited generations', 'High-res downloads', 'Commercial usage rights', 'Access to all styles'],
-      highlight: false,
-      btnText: 'Subscribe Monthly',
-      // Real Dodo Product ID: pdt_3aVAmpWj3afidH9fHcaTE
-      paymentLink: 'https://checkout.dodopayments.com/buy/pdt_3aVAmpWj3afidH9fHcaTE' 
-    },
-    {
-      name: 'Pro Annual',
-      price: '$99',
-      period: '/year',
-      description: 'Save 17% with yearly billing.',
-      features: ['Everything in Monthly', 'Priority generation speed', 'Early access to new models', 'Premium support'],
-      highlight: false,
-      badge: 'Best Value',
-      btnText: 'Subscribe Annually',
-      // Real Dodo Product ID: pdt_s9jBBy4nhitAcBtt25zqX
-      paymentLink: 'https://checkout.dodopayments.com/buy/pdt_s9jBBy4nhitAcBtt25zqX'
-    },
-    {
-      name: 'Lifetime',
-      price: '$150',
-      period: 'one-time',
-      description: 'Pay once, own Pro forever.',
-      features: ['Everything in Annual', 'Lifetime updates', 'No recurring fees', 'Founder community access'],
-      highlight: true,
-      badge: 'Limited Time',
-      btnText: 'Get Lifetime Access',
-      // Real Dodo Product ID: pdt_A2VyEzVG0z8LgBSTtu8mA
-      paymentLink: 'https://checkout.dodopayments.com/buy/pdt_A2VyEzVG0z8LgBSTtu8mA'
-    }
-  ];
+  const [isNigeria, setIsNigeria] = useState(false);
+  const [geoLoaded, setGeoLoaded] = useState(false);
+
+  useEffect(() => {
+    const detectCountry = async () => {
+      try {
+        const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.country_code === 'NG') {
+            setIsNigeria(true);
+          }
+        }
+      } catch {
+        // Geo-detection failed — default to standard pricing
+      } finally {
+        setGeoLoaded(true);
+      }
+    };
+    detectCountry();
+  }, []);
+
+  const plans = isNigeria ? NIGERIA_PLANS : DEFAULT_PLANS;
 
   const handleSubscribe = (link: string) => {
     // 1. Validation
@@ -87,6 +156,12 @@ export const PricingView: React.FC<PricingViewProps> = ({ onBack, userId }) => {
         <p className="mt-4 text-lg text-zinc-400">
           Upgrade to ProHeadshot AI for professional results. Choose the plan that fits your needs.
         </p>
+        {isNigeria && geoLoaded && (
+          <div className="mt-6 inline-flex items-center gap-2 bg-green-900/30 border border-green-700/40 text-green-300 px-4 py-2 rounded-full text-sm">
+            <span>🇳🇬</span>
+            <span>Nigeria pricing — adjusted for local purchasing power</span>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
