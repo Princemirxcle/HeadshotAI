@@ -149,7 +149,7 @@ const App = () => {
           <div className="flex items-center gap-6 text-sm font-medium text-zinc-400">
             <button 
                 onClick={() => navigateTo('pricing')} 
-                className={`transition-colors hidden sm:block ${currentView === 'pricing' ? 'text-white' : 'text-zinc-400 hover:text-white'}`}
+                className={`transition-colors ${currentView === 'pricing' ? 'text-white' : 'text-zinc-400 hover:text-white'}`}
             >
                 Pricing
             </button>
@@ -158,7 +158,7 @@ const App = () => {
                  <div className="flex items-center gap-4">
                      <button 
                         onClick={() => navigateTo('editor')}
-                        className={`${currentView === 'editor' ? 'text-white' : 'text-zinc-400 hover:text-white'} transition-colors hidden sm:block`}
+                        className={`${currentView === 'editor' ? 'text-white' : 'text-zinc-400 hover:text-white'} transition-colors`}
                      >
                         Editor
                      </button>
