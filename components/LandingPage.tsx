@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from './Button';
-import { XMarkIcon, ArrowRightIcon, CheckIcon, CameraIcon, SparklesIcon, DownloadIcon } from './Icons';
+import { XMarkIcon, ArrowRightIcon, CheckIcon, CameraIcon, SparklesIcon, DownloadIcon, GoogleIcon } from './Icons';
 import { toast } from 'react-hot-toast';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 
@@ -90,6 +90,29 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOp
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    if (!isSupabaseConfigured()) {
+        toast.success("Demo Mode: Access Granted");
+        onLogin();
+        return;
+    }
+
+    try {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin,
+            },
+        });
+        if (error) {
+            toast.error(error.message);
+        }
+    } catch (err) {
+        console.error(err);
+        toast.error("Google sign-in failed. Please try again.");
+    }
+  };
+
   return (
     <div className="w-full flex flex-col relative bg-[#222222] font-sans text-white">
         
@@ -113,6 +136,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOp
                                 ? 'Enter your details to access your headshots.' 
                                 : 'Start creating professional headshots today.'}
                         </p>
+                    </div>
+
+                    <button
+                        onClick={handleGoogleSignIn}
+                        className="w-full flex items-center justify-center gap-3 bg-white hover:bg-zinc-100 text-black font-medium rounded-xl px-4 py-3 transition-colors"
+                    >
+                        <GoogleIcon className="w-5 h-5" />
+                        Continue with Google
+                    </button>
+
+                    <div className="flex items-center gap-3 my-2">
+                        <div className="flex-1 h-px bg-white/10"></div>
+                        <span className="text-xs text-zinc-500 uppercase tracking-wider">or</span>
+                        <div className="flex-1 h-px bg-white/10"></div>
                     </div>
 
                     <form onSubmit={handleAuth} className="space-y-4">
