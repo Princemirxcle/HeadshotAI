@@ -14,7 +14,6 @@ interface LandingPageProps {
 export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOpen, setAuthModalOpen }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState(''); // New state for name
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
 
@@ -22,12 +21,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOp
     e.preventDefault();
     if (!email || !password) {
         toast.error("Please fill in all fields");
-        return;
-    }
-    
-    // Validate name for signup
-    if (authMode === 'signup' && !fullName) {
-        toast.error("Please enter your full name");
         return;
     }
     
@@ -49,11 +42,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOp
             const { data, error: signUpError } = await supabase.auth.signUp({
                 email,
                 password,
-                options: {
-                    data: {
-                        full_name: fullName,
-                    }
-                }
             });
             error = signUpError;
 
@@ -116,19 +104,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOp
                     </div>
 
                     <form onSubmit={handleAuth} className="space-y-4">
-                        {authMode === 'signup' && (
-                            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                                <label className="block text-xs font-medium text-zinc-400 mb-1.5">Full Name</label>
-                                <input 
-                                    type="text" 
-                                    value={fullName}
-                                    onChange={(e) => setFullName(e.target.value)}
-                                    className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all placeholder:text-zinc-700"
-                                    placeholder="Jane Doe"
-                                    required={authMode === 'signup'}
-                                />
-                            </div>
-                        )}
                         <div>
                             <label className="block text-xs font-medium text-zinc-400 mb-1.5">Email address</label>
                             <input 

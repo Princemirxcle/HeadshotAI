@@ -14,7 +14,6 @@ const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [userProfile, setUserProfile] = useState<{ full_name: string | null } | null>(null);
 
   // Initialize Auth Session
   useEffect(() => {
@@ -51,7 +50,6 @@ const App = () => {
       if (session) {
         setIsAuthenticated(true);
         setUserId(session.user.id);
-        fetchProfile(session.user.id);
         if (currentView === 'landing') setCurrentView('editor');
       }
     });
@@ -62,30 +60,15 @@ const App = () => {
       if (session) {
         setUserId(session.user.id);
         setShowAuthModal(false);
-        fetchProfile(session.user.id);
         if (currentView === 'landing') setCurrentView('editor');
       } else {
         setUserId(null);
-        setUserProfile(null);
         setCurrentView('landing');
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const fetchProfile = async (uid: string) => {
-    try {
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('id', uid)
-            .single();
-        if (!error && data) setUserProfile(data);
-    } catch (e) {
-        // Profile table may not exist yet - non-critical
-    }
-  };
 
   // Callback for Demo Mode (when Supabase is not configured)
   const handleLogin = () => {
@@ -101,7 +84,6 @@ const App = () => {
     }
     setIsAuthenticated(false);
     setUserId(null);
-    setUserProfile(null);
     setCurrentView('landing');
   };
 
@@ -164,11 +146,6 @@ const App = () => {
                      </button>
                      
                      <div className="flex items-center gap-3 pl-3 border-l border-zinc-700">
-                         {userProfile?.full_name && (
-                             <span className="text-xs text-zinc-300 hidden md:block">
-                                 Hi, {userProfile.full_name.split(' ')[0]}
-                             </span>
-                         )}
                          <Button variant="outline" onClick={handleLogout} className="h-8 px-3 text-xs">
                             Sign Out
                          </Button>
