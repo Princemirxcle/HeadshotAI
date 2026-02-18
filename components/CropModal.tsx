@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
+import 'react-easy-crop/react-easy-crop.css';
 import type { Area } from 'react-easy-crop';
 import { Button } from './Button';
 import { XMarkIcon } from './Icons';

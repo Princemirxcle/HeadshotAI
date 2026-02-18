@@ -13,6 +13,7 @@ const App = () => {
   const [currentView, setCurrentView] = useState<ViewState>('landing');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isPro, setIsPro] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Initialize Auth Session
@@ -29,6 +30,10 @@ const App = () => {
                 background: '#10B981', // Green background
                 color: '#fff',
             }
+        });
+        // Mark user as pro in Supabase user metadata
+        supabase.auth.updateUser({ data: { is_pro: true } }).then(() => {
+            setIsPro(true);
         });
         // Clear query params to clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -50,6 +55,7 @@ const App = () => {
       if (session) {
         setIsAuthenticated(true);
         setUserId(session.user.id);
+        setIsPro(session.user.user_metadata?.is_pro === true);
         if (currentView === 'landing') setCurrentView('editor');
       }
     });
@@ -59,10 +65,12 @@ const App = () => {
       setIsAuthenticated(!!session);
       if (session) {
         setUserId(session.user.id);
+        setIsPro(session.user.user_metadata?.is_pro === true);
         setShowAuthModal(false);
         if (currentView === 'landing') setCurrentView('editor');
       } else {
         setUserId(null);
+        setIsPro(false);
         setCurrentView('landing');
       }
     });
@@ -183,7 +191,7 @@ const App = () => {
         
         {currentView === 'editor' && (
              <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 flex-1 flex flex-col">
-                <EditorView />
+                <EditorView isPro={isPro} onNavigateToPricing={() => setCurrentView('pricing')} />
              </div>
         )}
 

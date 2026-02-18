@@ -8,8 +8,14 @@ import { CropModal } from './CropModal';
 import { editImageWithGemini } from '../services/geminiService';
 import { ImageState, GenerationStatus, PresetPrompt } from '../types';
 import { PRESET_PROMPTS } from '../constants';
+import { supabase } from '../lib/supabaseClient';
 
-export const EditorView = () => {
+interface EditorViewProps {
+  isPro: boolean;
+  onNavigateToPricing: () => void;
+}
+
+export const EditorView = ({ isPro, onNavigateToPricing }: EditorViewProps) => {
   const [imageState, setImageState] = useState<ImageState>({
     file: null,
     previewUrl: null,
@@ -95,8 +101,18 @@ export const EditorView = () => {
         return;
     }
 
+    // Free tier: limit to 1 generation — silently redirect to pricing
+    if (!isPro) {
+      const { data: { user } } = await supabase.auth.getUser();
+      const generationsUsed = user?.user_metadata?.generations_used ?? 0;
+      if (generationsUsed >= 1) {
+        onNavigateToPricing();
+        return;
+      }
+    }
+
     setStatus(GenerationStatus.LOADING);
-    
+
     try {
       const resultUrl = await editImageWithGemini(
         imageState.base64Data,
@@ -106,6 +122,13 @@ export const EditorView = () => {
       setGeneratedImage(resultUrl);
       setStatus(GenerationStatus.SUCCESS);
       setIsCustomMode(true);
+
+      // Increment generation counter in user metadata
+      if (!isPro) {
+        const { data: { user } } = await supabase.auth.getUser();
+        const current = user?.user_metadata?.generations_used ?? 0;
+        await supabase.auth.updateUser({ data: { generations_used: current + 1 } });
+      }
     } catch (error: any) {
       console.error(error);
       setStatus(GenerationStatus.ERROR);
@@ -201,13 +224,14 @@ export const EditorView = () => {
                             {!isCustomMode && !generatedImage && (
                                 <button
                                     onClick={() => {
+                                        setCustomPrompt('');
                                         setIsCustomMode(true);
                                         setSelectedPresetId('custom-edit');
                                         setTimeout(() => promptTextareaRef.current?.focus(), 100);
                                     }}
                                     className="text-[10px] uppercase tracking-wide text-brand-400 hover:text-brand-300 font-medium"
                                 >
-                                    Tweak this preset
+                                    Edit Prompt
                                 </button>
                             )}
                         </div>
@@ -278,10 +302,11 @@ export const EditorView = () => {
 
                 {/* Right Panel - Preview */}
                 <div className="lg:col-span-8 order-1 lg:order-2">
-                <ComparisonView 
+                <ComparisonView
                     originalUrl={imageState.previewUrl}
                     generatedUrl={generatedImage}
                     isLoading={status === GenerationStatus.LOADING}
+                    isPro={isPro}
                 />
                 </div>
 
