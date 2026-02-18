@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { toast } from 'react-hot-toast';
-import { SparklesIcon, UploadIcon, PhotoIcon, WandIcon } from './Icons';
+import { SparklesIcon, UploadIcon, PhotoIcon, WandIcon, XMarkIcon } from './Icons';
 import { Button } from './Button';
 import { PresetSelector } from './PresetSelector';
 import { ComparisonView } from './ComparisonView';
-import { editImageWithGemini, fileToBase64 } from '../services/geminiService';
+import { CropModal } from './CropModal';
+import { editImageWithGemini } from '../services/geminiService';
 import { ImageState, GenerationStatus, PresetPrompt } from '../types';
 import { PRESET_PROMPTS } from '../constants';
 
@@ -21,11 +22,13 @@ export const EditorView = () => {
   const [selectedPresetId, setSelectedPresetId] = useState<string>(PRESET_PROMPTS[0].id);
   const [customPrompt, setCustomPrompt] = useState<string>(PRESET_PROMPTS[0].prompt);
   const [isCustomMode, setIsCustomMode] = useState(false);
-  
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [rawImageSrc, setRawImageSrc] = useState<string | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const promptTextareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -33,26 +36,43 @@ export const EditorView = () => {
       toast.error('Please upload a valid image file (JPG, PNG, WEBP).');
       return;
     }
-    
+
     if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size too large. Please try an image under 5MB.');
-        return;
+      toast.error('File size too large. Please try an image under 5MB.');
+      return;
     }
 
-    try {
-      const { base64, mimeType, url } = await fileToBase64(file);
-      setImageState({
-        file,
-        previewUrl: url,
-        base64Data: base64,
-        mimeType,
-      });
+    const reader = new FileReader();
+    reader.onload = () => {
+      setRawImageSrc(reader.result as string);
+      setShowCropModal(true);
+    };
+    reader.onerror = () => toast.error('Failed to read image.');
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropDone = (blob: Blob) => {
+    setShowCropModal(false);
+    setRawImageSrc(null);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const [header, base64] = result.split(',');
+      const mimeType = header.match(/:(.*?);/)?.[1] || blob.type;
+      const previewUrl = URL.createObjectURL(blob);
+      setImageState({ file: null, previewUrl, base64Data: base64, mimeType });
       setGeneratedImage(null);
       setStatus(GenerationStatus.IDLE);
-    } catch (e) {
-      console.error(e);
-      toast.error('Failed to process image.');
-    }
+    };
+    reader.onerror = () => toast.error('Failed to process cropped image.');
+    reader.readAsDataURL(blob);
+  };
+
+  const handleCropCancel = () => {
+    setShowCropModal(false);
+    setRawImageSrc(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handlePresetSelect = (preset: PresetPrompt) => {
@@ -85,6 +105,7 @@ export const EditorView = () => {
       );
       setGeneratedImage(resultUrl);
       setStatus(GenerationStatus.SUCCESS);
+      setIsCustomMode(true);
     } catch (error: any) {
       console.error(error);
       setStatus(GenerationStatus.ERROR);
@@ -97,6 +118,12 @@ export const EditorView = () => {
     setGeneratedImage(null);
     setStatus(GenerationStatus.IDLE);
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleClearPrompt = () => {
+    setCustomPrompt('');
+    setIsCustomMode(true);
+    setTimeout(() => promptTextareaRef.current?.focus(), 100);
   };
 
   return (
@@ -169,10 +196,10 @@ export const EditorView = () => {
                     <div className="mb-6 relative">
                         <div className="flex items-center justify-between mb-2 ml-1">
                             <label className="text-xs text-zinc-500 font-medium block">
-                                {isCustomMode ? 'CUSTOM INSTRUCTIONS' : 'PROMPT DETAILS'}
+                                {generatedImage ? 'EDIT PROMPT' : isCustomMode ? 'CUSTOM INSTRUCTIONS' : 'PROMPT DETAILS'}
                             </label>
-                            {!isCustomMode && (
-                                <button 
+                            {!isCustomMode && !generatedImage && (
+                                <button
                                     onClick={() => {
                                         setIsCustomMode(true);
                                         setSelectedPresetId('custom-edit');
@@ -184,15 +211,15 @@ export const EditorView = () => {
                                 </button>
                             )}
                         </div>
-                        
+
                         <div className={`relative group transition-all duration-200 ${isCustomMode ? 'ring-2 ring-brand-500/20 rounded-xl' : ''}`}>
                             <textarea
                                 ref={promptTextareaRef}
                                 className={`w-full h-32 px-4 py-3 bg-black/20 border rounded-xl text-sm transition-all resize-none focus:outline-none focus:bg-black/40 ${
-                                    isCustomMode 
-                                        ? 'border-brand-500/30 text-zinc-100 placeholder-zinc-600' 
+                                    isCustomMode
+                                        ? 'border-brand-500/30 text-zinc-100 placeholder-zinc-600'
                                         : 'border-zinc-800/50 text-zinc-500 cursor-not-allowed bg-zinc-900/20'
-                                }`}
+                                } ${generatedImage && customPrompt ? 'pr-10' : ''}`}
                                 value={customPrompt}
                                 onChange={(e) => {
                                     setCustomPrompt(e.target.value);
@@ -204,15 +231,29 @@ export const EditorView = () => {
                                 placeholder="e.g. Remove the background, add cinematic lighting..."
                                 readOnly={!isCustomMode}
                             />
-                            {isCustomMode && (
+                            {generatedImage && customPrompt && (
+                                <button
+                                    onClick={handleClearPrompt}
+                                    className="absolute top-3 right-3 text-zinc-500 hover:text-zinc-300 transition-colors"
+                                    title="Clear prompt"
+                                >
+                                    <XMarkIcon className="w-4 h-4" />
+                                </button>
+                            )}
+                            {isCustomMode && !customPrompt && (
                                 <div className="absolute bottom-3 right-3">
                                     <WandIcon className="w-4 h-4 text-brand-500/50" />
                                 </div>
                             )}
                         </div>
+                        {generatedImage && (
+                            <p className="text-[10px] text-zinc-600 mt-1.5 ml-1">
+                                Edit the prompt above and click Regenerate to try a different style.
+                            </p>
+                        )}
                     </div>
 
-                    <Button 
+                    <Button
                         onClick={handleGenerate}
                         isLoading={status === GenerationStatus.LOADING}
                         className="w-full py-3.5 text-sm font-semibold shadow-lg shadow-brand-900/20 active:translate-y-0.5 bg-brand-600 hover:bg-brand-500 text-white border-0"
@@ -222,7 +263,7 @@ export const EditorView = () => {
                         ) : (
                             <span className="flex items-center">
                                 <SparklesIcon className="w-4 h-4 mr-2" />
-                                Generate Image
+                                {generatedImage ? 'Regenerate' : 'Generate Image'}
                             </span>
                         )}
                     </Button>
@@ -247,6 +288,13 @@ export const EditorView = () => {
             </div>
             )
         }
+      {showCropModal && rawImageSrc && (
+        <CropModal
+          imageSrc={rawImageSrc}
+          onCropDone={handleCropDone}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 };
