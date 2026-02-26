@@ -4,10 +4,11 @@ import { Toaster, toast } from 'react-hot-toast';
 import { EditorView } from './components/EditorView';
 import { PricingView } from './components/PricingView';
 import { LandingPage } from './components/LandingPage';
+import { ResetPasswordView } from './components/ResetPasswordView';
 import { Button } from './components/Button';
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient';
 
-type ViewState = 'landing' | 'editor' | 'pricing';
+type ViewState = 'landing' | 'editor' | 'pricing' | 'reset-password';
 
 const App = () => {
   const [currentView, setCurrentView] = useState<ViewState>('landing');
@@ -54,8 +55,12 @@ const App = () => {
       }
     });
 
-    // 2. Listen for auth changes (login/logout/signup)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // 2. Listen for auth changes (login/logout/signup/password recovery)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setCurrentView('reset-password');
+        return;
+      }
       setIsAuthenticated(!!session);
       if (session) {
         setUserId(session.user.id);
@@ -104,6 +109,10 @@ const App = () => {
     setShowAuthModal(true);
   };
 
+  const handlePasswordResetSuccess = () => {
+    setCurrentView('editor');
+  };
+
   return (
     <div className="min-h-screen bg-brand-900 text-zinc-100 selection:bg-brand-500/30 flex flex-col font-sans">
       <Toaster 
@@ -117,6 +126,11 @@ const App = () => {
             }
         }}
       />
+
+      {/* Password Reset Overlay */}
+      {currentView === 'reset-password' && (
+        <ResetPasswordView onSuccess={handlePasswordResetSuccess} />
+      )}
 
       {/* Header */}
       <header className="w-full z-50 border-b border-white/5 bg-brand-900/80 backdrop-blur-md sticky top-0">

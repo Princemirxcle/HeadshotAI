@@ -15,7 +15,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOp
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'forgot-password'>('signup');
+  const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +79,36 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOp
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+        toast.error("Please enter your email address");
+        return;
+    }
+    setIsSubmitting(true);
+    try {
+        if (!isSupabaseConfigured()) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setForgotPasswordSent(true);
+            setIsSubmitting(false);
+            return;
+        }
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin,
+        });
+        if (error) {
+            toast.error(error.message);
+        } else {
+            setForgotPasswordSent(true);
+        }
+    } catch (err) {
+        console.error(err);
+        toast.error("Failed to send reset email. Please try again.");
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="w-full flex flex-col relative bg-[#222222] font-sans text-white">
         
@@ -94,58 +125,127 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, isAuthModalOp
                     
                     <div className="text-center mb-8">
                         <h2 className="text-2xl font-serif font-medium text-white mb-2">
-                            {authMode === 'signin' ? 'Welcome back' : 'Create your account'}
+                            {authMode === 'signin' ? 'Welcome back' : authMode === 'signup' ? 'Create your account' : 'Reset your password'}
                         </h2>
                         <p className="text-zinc-400 text-sm">
-                            {authMode === 'signin' 
-                                ? 'Enter your details to access your headshots.' 
-                                : 'Start creating professional headshots today.'}
+                            {authMode === 'signin'
+                                ? 'Enter your details to access your headshots.'
+                                : authMode === 'signup'
+                                ? 'Start creating professional headshots today.'
+                                : 'Enter your email and we\'ll send you a reset link.'}
                         </p>
                     </div>
 
-                    <form onSubmit={handleAuth} className="space-y-4">
-                        <div>
-                            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Email address</label>
-                            <input 
-                                type="email" 
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all placeholder:text-zinc-700"
-                                placeholder="name@company.com"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Password</label>
-                            <input 
-                                type="password" 
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all placeholder:text-zinc-700"
-                                placeholder="••••••••"
-                                required
-                            />
-                        </div>
+                    {authMode === 'forgot-password' ? (
+                        forgotPasswordSent ? (
+                            <div className="text-center space-y-4">
+                                <div className="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center mx-auto">
+                                    <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <p className="text-white font-medium">Check your email</p>
+                                <p className="text-zinc-400 text-sm">
+                                    We've sent a password reset link to <span className="text-white">{email}</span>.
+                                    Check your inbox and follow the link to reset your password.
+                                </p>
+                                <button
+                                    onClick={() => { setAuthMode('signin'); setForgotPasswordSent(false); setEmail(''); }}
+                                    className="mt-4 text-brand-400 hover:text-brand-300 font-medium hover:underline text-sm"
+                                >
+                                    Back to sign in
+                                </button>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleForgotPassword} className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Email address</label>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all placeholder:text-zinc-700"
+                                        placeholder="name@company.com"
+                                        required
+                                    />
+                                </div>
+                                <Button
+                                    type="submit"
+                                    variant="primary"
+                                    className="w-full py-3 mt-2 bg-brand-600 hover:bg-brand-500 border-0 text-white"
+                                    isLoading={isSubmitting}
+                                >
+                                    Send Reset Link
+                                </Button>
+                                <div className="text-center">
+                                    <button
+                                        type="button"
+                                        onClick={() => setAuthMode('signin')}
+                                        className="text-zinc-500 hover:text-zinc-300 text-sm transition-colors"
+                                    >
+                                        Back to sign in
+                                    </button>
+                                </div>
+                            </form>
+                        )
+                    ) : (
+                        <>
+                            <form onSubmit={handleAuth} className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Email address</label>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all placeholder:text-zinc-700"
+                                        placeholder="name@company.com"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <label className="block text-xs font-medium text-zinc-400">Password</label>
+                                        {authMode === 'signin' && (
+                                            <button
+                                                type="button"
+                                                onClick={() => { setAuthMode('forgot-password'); setForgotPasswordSent(false); }}
+                                                className="text-xs text-brand-400 hover:text-brand-300 transition-colors hover:underline"
+                                            >
+                                                Forgot password?
+                                            </button>
+                                        )}
+                                    </div>
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all placeholder:text-zinc-700"
+                                        placeholder="••••••••"
+                                        required
+                                    />
+                                </div>
 
-                        <Button 
-                            type="submit" 
-                            variant="primary" 
-                            className="w-full py-3 mt-2 bg-brand-600 hover:bg-brand-500 border-0 text-white"
-                            isLoading={isSubmitting}
-                        >
-                            {authMode === 'signin' ? 'Sign In' : 'Sign Up Free'}
-                        </Button>
-                    </form>
+                                <Button
+                                    type="submit"
+                                    variant="primary"
+                                    className="w-full py-3 mt-2 bg-brand-600 hover:bg-brand-500 border-0 text-white"
+                                    isLoading={isSubmitting}
+                                >
+                                    {authMode === 'signin' ? 'Sign In' : 'Sign Up Free'}
+                                </Button>
+                            </form>
 
-                    <div className="mt-6 text-center text-sm text-zinc-500">
-                        {authMode === 'signin' ? "Don't have an account? " : "Already have an account? "}
-                        <button 
-                            onClick={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')}
-                            className="text-brand-400 hover:text-brand-300 font-medium hover:underline"
-                        >
-                            {authMode === 'signin' ? 'Sign up' : 'Sign in'}
-                        </button>
-                    </div>
+                            <div className="mt-6 text-center text-sm text-zinc-500">
+                                {authMode === 'signin' ? "Don't have an account? " : "Already have an account? "}
+                                <button
+                                    onClick={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')}
+                                    className="text-brand-400 hover:text-brand-300 font-medium hover:underline"
+                                >
+                                    {authMode === 'signin' ? 'Sign up' : 'Sign in'}
+                                </button>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         )}
