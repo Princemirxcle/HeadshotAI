@@ -1,8 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 
 /**
- * Edits an image using the Gemini 2.5 Flash Image model.
- * 
+ * Edits an image using the Nano Banana 2 (Gemini 3.1 Flash Image) model.
+ *
  * @param base64Image Raw base64 string of the source image.
  * @param mimeType Mime type of the source image (e.g., 'image/jpeg').
  * @param prompt Text instruction for the edit.
@@ -21,7 +21,7 @@ export const editImageWithGemini = async (
   const ai = new GoogleGenAI({ apiKey });
 
   // 1. Construct the request parts: Image + Text Prompt
-  // Gemini 2.5 Flash Image supports "editing" by simply providing the source image and a prompt describing the desired output.
+  // Nano Banana 2 (Gemini 3.1 Flash Image) supports editing by providing the source image and a prompt describing the desired output.
   const parts = [
     {
       inlineData: {
@@ -36,7 +36,7 @@ export const editImageWithGemini = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: 'gemini-3.1-flash-image-preview',
       contents: {
         parts: parts,
       },

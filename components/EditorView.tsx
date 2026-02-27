@@ -271,7 +271,7 @@ export const EditorView = () => {
                 
                 <div className="px-2 text-center">
                     <p className="text-xs text-zinc-600">
-                        Using <span className="text-zinc-500 font-medium">Gemini 2.5 Flash Image</span> for high-fidelity editing.
+                        Using <span className="text-zinc-500 font-medium">Nano Banana 2</span> for high-fidelity editing.
                     </p>
                 </div>
                 </div>

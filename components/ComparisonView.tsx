@@ -66,7 +66,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({ originalUrl, gen
 
       {generatedUrl && !isLoading && (
           <div className="p-4 border-t border-zinc-800/50 bg-zinc-900/40 flex justify-end items-center gap-4 backdrop-blur-sm absolute bottom-0 w-full">
-             <span className="text-xs text-zinc-500 hidden sm:inline-block">Generated with Gemini 2.5 Flash</span>
+             <span className="text-xs text-zinc-500 hidden sm:inline-block">Generated with Nano Banana 2</span>
              <Button variant="primary" onClick={handleDownload} className="shadow-lg shadow-white/10">
                 <DownloadIcon className="w-4 h-4 mr-2" />
                 Download HD
